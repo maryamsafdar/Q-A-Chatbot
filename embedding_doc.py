@@ -1,61 +1,69 @@
 import os
 from config import OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_API_ENVIRONMENT
-from langchain_community.document_loaders import UnstructuredPDFLoader
-from langchain_community.vectorstores import Pinecone
+from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-
-
-# Initialize Pinecone
 from pinecone import Pinecone, ServerlessSpec
 
-# Set your API keys and environment variables
+# Set API keys and environment variables
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 os.environ["PINECONE_API_KEY"] = PINECONE_API_KEY
-os.environ["PINECONE_ENV"] = PINECONE_API_ENVIRONMENT  # or the region of your Pinecone environment
+os.environ["PINECONE_ENV"] = PINECONE_API_ENVIRONMENT
 
 # Initialize Pinecone instance
 pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
 
-# Check if index exists, and create it if it doesn't
-index_name = "langchain-chatbot"
+# Define index name
+index_name = "langchain-chatbot12"
+
+# Check if the index exists, and create it if it doesn't
 if index_name not in pc.list_indexes().names():
-    pc.create_index(
-        name=index_name,
-        dimension=1536,  # Assuming 1536 dimensions for OpenAI embeddings
-        metric="cosine",
-        spec=ServerlessSpec(
-            cloud="aws",
-            region=PINECONE_API_ENVIRONMENT
-        )
+    print("Index does not exist. Creating index...")
+    try:
+        pc.create_index(
+    name=index_name,
+    dimension=1536,  # Update dimension to match embeddings
+    metric="cosine",
+    spec=ServerlessSpec(
+        cloud="aws",
+        region=PINECONE_API_ENVIRONMENT
     )
-
-# Load PDF document
-pdf_loader = UnstructuredPDFLoader("E:\Web Developement\document-answer-langchain-pinecone-openai\PES Highlights 2021-22 New.pdf")
-documents = pdf_loader.load()
-
-# Split document into smaller chunks for embeddings
-text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=500,
-    chunk_overlap=50,
 )
+
+        print(f"Index '{index_name}' created successfully.")
+    except Exception as e:
+        print(f"Failed to create index '{index_name}': {e}")
+else:
+    print(f"Index '{index_name}' already exists.")
+
+# Verify by listing indexes again
+print("Current indexes in Pinecone:", pc.list_indexes().names())
+
+# Load and embed document
+pdf_loader = PyPDFLoader("PES Highlights 2021-22 New.pdf")
+documents = pdf_loader.load()
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
 docs = text_splitter.split_documents(documents)
 
-# Embed documents with OpenAI embeddings
-embedding = OpenAIEmbeddings(model="text-embedding-3-large", openai_api_key=os.environ.get("OPENAI_API_KEY"))
-doc_embeddings = [embedding.embed_text(doc.page_content) for doc in docs]
+# Embed documents
+embedding = OpenAIEmbeddings(model="text-embedding-ada-002", openai_api_key=os.environ.get("OPENAI_API_KEY"))
+
+# Embed documents using embed_documents instead of embed_text
+doc_embeddings = embedding.embed_documents([doc.page_content for doc in docs])
 
 # Store embeddings in Pinecone index
 pinecone_index = pc.Index(index_name)
 for doc, vector in zip(docs, doc_embeddings):
     pinecone_index.upsert(
-        items=[
-            {
-                "id": doc.metadata.get("id", "doc"),
-                "values": vector,
-                "metadata": doc.metadata
-            }
-        ]
-    )
+    vectors=[
+        {
+            "id": doc.metadata.get("id", f"doc-{i}"),  # Add a unique ID for each document
+            "values": vector,
+            "metadata": doc.metadata
+        }
+        for i, (doc, vector) in enumerate(zip(docs, doc_embeddings))
+    ]
+)
+
 
 print("Documents embedded and stored in Pinecone successfully!")

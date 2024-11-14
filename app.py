@@ -39,7 +39,7 @@ usr_input = st.text_input('What is your question?')
 
 # Set OpenAI LLM and embeddings
 llm_chat = ChatOpenAI(temperature=0.9, max_tokens=150, model='gpt-4o-mini')
-embeddings = OpenAIEmbeddings(model="text-embedding-3-large", openai_api_key=os.environ.get("OPENAI_API_KEY"))
+embeddings = OpenAIEmbeddings(model="text-embedding-ada-002", openai_api_key=os.environ.get("OPENAI_API_KEY"))
 
 # Connect LangChain's Pinecone vector store to the existing index
 docsearch = PineconeVectorStore(index=index, embedding=embeddings)
