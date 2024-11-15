@@ -1,7 +1,6 @@
 import os
 import streamlit as st
 import logging
-from config import OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_API_ENVIRONMENT, PINECONE_INDEX_NAME
 from langchain_openai import ChatOpenAI
 from langchain_pinecone import PineconeVectorStore
 from langchain_community.embeddings import OpenAIEmbeddings
@@ -107,12 +106,7 @@ st.markdown(
     </style>
     """,
     unsafe_allow_html=True,
-)
-st.set_page_config(
-    page_title="AI Q&A Assistant🤖",
-    page_icon="❓",
-    layout="wide"
-)
+
 st.markdown('<div class="main-title">❓ AI Q&A Assistant</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-header">Upload your documents and get instant answers to your questions!</div>', unsafe_allow_html=True)
 
