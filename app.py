@@ -108,8 +108,12 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
-st.markdown('<div class="main-title">📚 AI Document Assistant</div>', unsafe_allow_html=True)
+st.set_page_config(
+    page_title="AI Q&A Assistant🤖",
+    page_icon="❓",
+    layout="wide"
+)
+st.markdown('<div class="main-title">❓ AI Q&A Assistant</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-header">Upload your documents and get instant answers to your questions!</div>', unsafe_allow_html=True)
 
 # Sidebar
