@@ -1,6 +1,7 @@
 import os
 import streamlit as st
 import logging
+from config import OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_API_ENVIRONMENT, PINECONE_INDEX_NAME
 from langchain_openai import ChatOpenAI
 from langchain_pinecone import PineconeVectorStore
 from langchain_community.embeddings import OpenAIEmbeddings
