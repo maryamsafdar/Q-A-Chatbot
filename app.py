@@ -103,7 +103,6 @@ def qa_function(query):
     return result["answer"], result.get("context", [])
 
 
-
 # Function to generate responses
 def response_generator(query):
     try:
