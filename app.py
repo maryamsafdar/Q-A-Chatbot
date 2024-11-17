@@ -9,6 +9,9 @@ from langchain.chains.question_answering import load_qa_chain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import PyPDFLoader
 from pinecone import Pinecone, ServerlessSpec
+from langchain.chains import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
 
 # Load environment variables and set OpenAI API key
@@ -50,8 +53,8 @@ if not os.path.exists(temp_dir):
 # Function to load and index PDFs
 def load_pdf_to_vector_db(pdf_path):
     try:
-        loader = PyPDFLoader(pdf_path)
-        documents = loader.load()
+        pdf_loader = PyPDFLoader("DOC-20241022-WA0018..pdf")
+        documents = pdf_loader.load()
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
         split_docs = text_splitter.split_documents(documents)
         vector_store.add_documents(documents=split_docs)
@@ -66,6 +69,40 @@ if "history" not in st.session_state:
 
 # LLM setup
 llm_chat = ChatOpenAI(temperature=0.9, max_tokens=150, model='gpt-4o-mini', api_key=OPENAI_API_KEY)
+
+def qa_function(query):
+    qa_prompt_template = """
+    You are an assistant for answering questions.
+
+    If context is provided below, use it to answer the question concisely.
+
+    If no context is provided, answer the question to the best of your ability using your general knowledge.
+
+    Context:
+    {context}
+
+    Question: {input}
+    """
+
+    
+    qa_prompt = PromptTemplate.from_template(qa_prompt_template)
+
+    # Create a "stuff" documents chain within the function
+    qa_chain = create_stuff_documents_chain(llm_chat, qa_prompt)
+
+    # Set up a retriever chain within the function
+    retrieval_chain = create_retrieval_chain(
+        retriever=vector_store.as_retriever(),
+        combine_docs_chain=qa_chain
+    )
+
+    # Use the retrieval chain to get the answer
+    result = retrieval_chain.invoke({"input": query})
+
+    # Return answer and relevant documents
+    return result["answer"], result.get("context", [])
+
+
 
 # Function to generate responses
 def response_generator(query):
@@ -108,20 +145,9 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-st.markdown('<div class="main-title">❓ AI Q&A Assistant</div>', unsafe_allow_html=True)
+
+st.markdown('<div class="main-title">📚 AI Document Assistant</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-header">Upload your documents and get instant answers to your questions!</div>', unsafe_allow_html=True)
-
-# Sidebar
-st.sidebar.header("🗂️ Manage Your Session")
-uploaded_file = st.sidebar.file_uploader("📄 Upload PDF File", type=["pdf"])
-
-if uploaded_file:
-    sanitized_file_name = uploaded_file.name.lower().replace(" ", "_")
-    temp_path = os.path.join(temp_dir, sanitized_file_name)
-    with open(temp_path, "wb") as f:
-        f.write(uploaded_file.getbuffer())
-    vector_store = load_pdf_to_vector_db(temp_path)
-    st.sidebar.success(f"File '{sanitized_file_name}' successfully uploaded and indexed!")
 
 if st.sidebar.button("🔄 Reset Conversation"):
     st.session_state.history.clear()
@@ -150,4 +176,5 @@ if user_query:
 
     # Redisplay chat after input
     display_chat()
+
 
