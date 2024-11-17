@@ -170,7 +170,7 @@ if user_query:
 
     # Generate response
     with st.spinner("🔍 Generating response..."):
-        response, docs = response_generator(query=user_query)
+        response, docs = qa_function(query=user_query)
 
     # Fallback handling
     if response:
