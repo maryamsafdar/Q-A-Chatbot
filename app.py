@@ -157,7 +157,7 @@ st.markdown('<div class="main-title">🤖 AI Q&A Assistant</div>', unsafe_allow_
 st.markdown('<div class="sub-header">Upload your documents and get instant answers to your questions!</div>', unsafe_allow_html=True)
 
 
- Sidebar for file upload
+#Sidebar for file upload
 st.sidebar.header("Upload PDF Files")
 uploaded_file = st.sidebar.file_uploader("Upload a PDF file", type=["pdf"])
 if uploaded_file:
