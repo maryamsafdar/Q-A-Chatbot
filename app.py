@@ -60,8 +60,9 @@ if not os.path.exists(temp_dir):
 # Function to load and index PDFs
 def load_pdf_to_vector_db(pdf_path):
     try:
-        pdf_loader = PyPDFLoader("DOC-20241022-WA0018..pdf")
-        documents = pdf_loader.load()
+        print("Loading PDF document...")
+        loader = PyPDFLoader(pdf_path)
+        documents = loader.load()
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
         split_docs = text_splitter.split_documents(documents)
         vector_store.add_documents(documents=split_docs)
