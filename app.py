@@ -156,6 +156,23 @@ st.markdown(
 st.markdown('<div class="main-title">🤖 AI Q&A Assistant</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-header">Upload your documents and get instant answers to your questions!</div>', unsafe_allow_html=True)
 
+
+ Sidebar for file upload
+st.sidebar.header("Upload PDF Files")
+uploaded_file = st.sidebar.file_uploader("Upload a PDF file", type=["pdf"])
+if uploaded_file:
+    # Sanitize the file name: convert to lowercase and replace spaces with underscores
+    sanitized_file_name = uploaded_file.name.lower().replace(" ", "_")
+    
+    # Save the uploaded file temporarily
+    temp_path = os.path.join(temp_dir, sanitized_file_name)
+    with open(temp_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())
+
+    # Load the PDF into the VectorStore
+    vector_store = load_pdf_to_vector_db(temp_path)
+    st.sidebar.success(f"File '{sanitized_file_name}' successfully uploaded and indexed!")
+
 if st.sidebar.button("🔄 Reset Conversation"):
     st.session_state.history.clear()
 
