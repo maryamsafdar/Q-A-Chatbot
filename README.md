@@ -36,27 +36,38 @@ cd <repository-name>
 
 ### 3. Set Up Environment Variables
 
-Create a .env file in the project root directory and populate it with the required keys:
-- OPENAI_API_KEY=<your_openai_api_key>
-- PINECONE_API_KEY=<your_pinecone_api_key>
-- PINECONE_API_ENVIRONMENT=<your_pinecone_environment>
-- PINECONE_INDEX_NAME=<your_index_name>
+Create a `.env` file in the project root directory and populate it with the following environment variables:
+
+```env
+OPENAI_API_KEY=<your_openai_api_key>
+PINECONE_API_KEY=<your_pinecone_api_key>
+PINECONE_API_ENVIRONMENT=<your_pinecone_environment>
+PINECONE_INDEX_NAME=<your_index_name>
+
 
 ### 4. Install Dependencies
 
-Set up the Python environment and install all dependencies:
-# Create and activate a virtual environment (optional)
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+To ensure all necessary packages are installed, follow these steps:
 
-# Install required Python packages
-pip install -r requirements.txt
+1. **Create a Virtual Environment** (optional but recommended):
+   ```bash
+   python3 -m venv venv
+2. **Activate the Virtual Environment:**
+   ```bash
+   venv\Scripts\activate
+3. **Install Required Packages:**
+Use the requirements.txt file to install all dependencies:
+   ```bash
+   pip install -r requirements.txt
+
 
 ### 5. Run the Application
 
 Launch the Streamlit application:
 ```bash
    streamlit run main.py
+
+
 This command will start a local web server and provide a URL (e.g., http://localhost:8501) to access the application.
 
 
