@@ -51,7 +51,7 @@ To ensure all necessary packages are installed, follow these steps:
 
 1. **Create a Virtual Environment** (optional but recommended):
    ```bash
-   python3 -m venv venv
+   python -m venv venv
    ```
 2. **Activate the Virtual Environment:**
    ```bash
