@@ -200,5 +200,3 @@ if user_query:
 
     # Redisplay chat after input
     display_chat()
-
-
