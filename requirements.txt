@@ -5,6 +5,6 @@ langchain
 langchain-openai
 langchain-pinecone
 langchain-community
-pinecone-client>=4.0.0
+pinecone
 pydantic
 pypdf
