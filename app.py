@@ -11,6 +11,8 @@ from langchain.document_loaders import PyPDFLoader
 from pinecone import Pinecone, ServerlessSpec # type: ignore
 from dotenv import load_dotenv
 from pydantic import SecretStr
+from langchain.prompts import PromptTemplate
+
 
 # Streamlit page config
 st.set_page_config(
@@ -83,8 +85,6 @@ def load_pdf_to_vector_db(pdf_path):
     except Exception as e:
         logger.error(f"❌ Error loading PDF: {e}")
         return False
-# QA function
-from langchain.prompts import PromptTemplate
 
 # Prompt template: combines context (if available) with general answering ability
 qa_prompt = PromptTemplate(
