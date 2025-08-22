@@ -84,7 +84,48 @@ def load_pdf_to_vector_db(pdf_path):
         logger.error(f"❌ Error loading PDF: {e}")
         return False
 # QA function
+from langchain.prompts import PromptTemplate
+
+# Prompt template: combines context (if available) with general answering ability
+qa_prompt = PromptTemplate(
+    input_variables=["context", "question"],
+    template="""
+You are an intelligent assistant. Use the provided context to answer the question. 
+If the context does not contain the answer, still try to provide a helpful and relevant response 
+using your general knowledge.
+
+Context:
+{context}
+
+Question: {question}
+
+Answer:
+"""
+)
+
 def qa_function(query):
+    vector_store = st.session_state.get("vector_store")
+
+    try:
+        docs = []
+        if vector_store:
+            retriever = vector_store.as_retriever(search_kwargs={"k": 10})
+            docs = retriever.get_relevant_documents(query)
+
+        # Join retrieved docs into context text
+        context_text = "\n\n".join([d.page_content for d in docs]) if docs else "No context available."
+
+        chain = load_qa_chain(llm=llm_chat, chain_type="stuff", prompt=qa_prompt)
+
+        logger.info(f"🔍 Retrieved {len(docs)} documents for query: {query[:50]}...")
+
+        response = chain.run(input_documents=docs, question=query)
+        return response or "Sorry, I could not generate an answer."
+
+    except Exception as e:
+        logger.error(f"❌ Error generating answer: {e}")
+        return "Sorry, there was an error processing your request."
+
     vector_store = st.session_state.get("vector_store")
     if not vector_store:
         return "No documents available. Please upload a PDF first."
